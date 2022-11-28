@@ -46,7 +46,8 @@
 #' @param tableCheckThresholdLoc    The location of the threshold file for evaluating the table checks. If not specified the default thresholds will be applied.
 #' @param fieldCheckThresholdLoc    The location of the threshold file for evaluating the field checks. If not specified the default thresholds will be applied.
 #' @param conceptCheckThresholdLoc  The location of the threshold file for evaluating the concept checks. If not specified the default thresholds will be applied.
-#' 
+#' @param resume                    Boolean to indicate if processing will be resumed
+#'
 #' @return If sqlOnly = FALSE, a list object of results
 #' 
 #' @importFrom magrittr %>%
@@ -77,7 +78,8 @@ executeDqChecks <- function(connectionDetails,
                             cdmVersion = "5.3",
                             tableCheckThresholdLoc = "default",
                             fieldCheckThresholdLoc = "default",
-                            conceptCheckThresholdLoc = "default") {
+                            conceptCheckThresholdLoc = "default",
+                            resume = FALSE) {
   # Check input -------------------------------------------------------------------------------------------------------------------
   if (!("connectionDetails" %in% class(connectionDetails))){
     stop("connectionDetails must be an object of class 'connectionDetails'.")
@@ -94,7 +96,8 @@ executeDqChecks <- function(connectionDetails,
   
   stopifnot(is.null(checkNames) | is.character(checkNames), is.null(tablesToExclude) | is.character(tablesToExclude))
   stopifnot(is.character(cdmVersion))
-  
+  stopifnot(is.logical(resume))
+
   # Warning if check names for determining NA is missing
   if (!length(checkNames)==0){
     for(requiredCheckName in c("cdmTable", "cdmField", "measureValueCompleteness")) {
@@ -251,7 +254,9 @@ executeDqChecks <- function(connectionDetails,
     cohortDatabaseSchema,
     cohortDefinitionId,
     outputFolder, 
+    outputFile,
     sqlOnly,
+    resume,
     progressBar = TRUE
   )
   ParallelLogger::stopCluster(cluster = cluster)
@@ -295,8 +300,8 @@ executeDqChecks <- function(connectionDetails,
     }
     
     .writeResultsToJson(allResults, outputFolder, outputFile)
-    
-    ParallelLogger::logInfo("Execution Complete")  
+
+    ParallelLogger::logInfo("Execution Complete")
   }
   
   
