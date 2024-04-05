@@ -86,8 +86,18 @@
   tryCatch(
     expr = {
       DatabaseConnector::insertTable(
-        connection = connection, tableName = tableName, data = checkResults,
-        dropTableIfExists = FALSE, createTable = FALSE, tempTable = FALSE
+        connection = connection,
+        ## With DBI connection table name will be quoted
+        ## E.g. myschema.mytable becomes [myschema.mytable],
+        ## but should be [myschema].[mytable]
+        ## Providing databaseSchema addresses this, including case when
+        ## schema name contains catalog name, e.g. mycatolog.myschema
+        databaseSchema = resultsDatabaseSchema,
+        tableName = writeTableName,
+        data = checkResults,
+        dropTableIfExists = FALSE,
+        createTable = FALSE,
+        tempTable = FALSE
       )
       ParallelLogger::logInfo("Finished writing table")
     },
